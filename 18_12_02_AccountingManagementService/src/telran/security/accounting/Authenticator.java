@@ -19,9 +19,7 @@ public class Authenticator implements UserDetailsService {
 		String passwordHash=accounting.getPassword(username);
 		if(passwordHash==null)
 			throw new UsernameNotFoundException("");
-		return new User(username, passwordHash,
-				AuthorityUtils
-				.createAuthorityList(accounting.getRoles(username)));
+		return new User(username, passwordHash, AuthorityUtils.createAuthorityList(accounting.getRoles(username)));
 	}
 
 }
