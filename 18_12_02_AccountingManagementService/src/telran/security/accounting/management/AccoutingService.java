@@ -49,63 +49,63 @@ public class AccoutingService implements IAccountingManagement {
 	}
 
 	@Override
-	public boolean removeAccount(String id) {
+	public ResponseCode removeAccount(String id) {
 		if (!accountsRepository.existsById(id)) {
 			System.out.println("Account is not found");
-			return false;
+			return NO_USERNAME;
 		}
 		accountsRepository.deleteById(id);
-		return true;
+		return OK;
 	}
 
 	@Override
-	public boolean addRole(String username, String role) {
+	public ResponseCode addRole(String username, String role) {
 		if (!accountsRepository.existsById(username)) {
 			System.out.println("Account is not found");
-			return false;
+			return NO_USERNAME;
 		}
 		Account account = accountsRepository.findById(username).get();
-		HashSet<String> roles = account.getRoles();
-		roles.add(role);
-		account.setRoles(roles);
-		accountsRepository.save(account);
-		return true;
+		if(account != null && account.getRoles().add(role)) {
+			accountsRepository.save(account);
+			return OK;
+		}else
+			return ROLE_EXIST;
 	}
 
 	@Override
-	public boolean removeRole(String username, String role) {
+	public ResponseCode removeRole(String username, String role) {
 		if (!accountsRepository.existsById(username)) {
 			System.out.println("Account is not found");
-			return false;
+			return NO_USERNAME;
 		}
 		Account account = accountsRepository.findById(username).get();
-		HashSet<String> roles = account.getRoles();
-		roles.remove(role);
-		account.setRoles(roles);
-		accountsRepository.save(account);
-		return true;
+		if(account != null && account.getRoles().remove(role)) {
+			accountsRepository.save(account);
+			return OK;
+		}else
+			return ROLE_NO_EXIST;
 	}
 
 	@Override
-	public boolean updatePassword(String username, String password) {
+	public ResponseCode updatePassword(String username, String password) {
 		if (!accountsRepository.existsById(username)) {
 			System.out.println("Account is not found");
-			return false;
+			return NO_USERNAME;
 		}
 		String resultCheck = checkPasswordMatches(password);
 		if (resultCheck.length()!=0) {
 			System.out.println("Password incorrect.\n"+resultCheck);
-			return false;
+			return PASSWORD_INCORRECT;
 		}
 		Account account = accountsRepository.findById(username).get();
 		String lastPasswordHash = account.getPassword_hash();
 		ArrayList<String> lastPasswords = account.getLast_password_hashes();
 		if (checkNewPasswordNonEqualsOld(password, lastPasswordHash))
-			return false;
+			return PASSWORD_SHOULD_NOT_REPEAT_PREVIOUS_3_PASSWORDS;
 		if (lastPasswords.size() > 0) {
 			for (String pass : lastPasswords) {
 				if (checkNewPasswordNonEqualsOld(pass, password))
-					return false;
+					return PASSWORD_SHOULD_NOT_REPEAT_PREVIOUS_3_PASSWORDS;
 			}
 		}
 		if (lastPasswords.size() < N_LAST_PASSWORDS) {
@@ -118,7 +118,7 @@ public class AccoutingService implements IAccountingManagement {
 		account.setPassword_hash(newPasswordHash);
 		account.setLast_password_hashes(lastPasswords);
 		accountsRepository.save(account);
-		return true;
+		return OK;
 
 	}
 
@@ -127,36 +127,40 @@ public class AccoutingService implements IAccountingManagement {
 	}
 
 	@Override
-	public boolean revokeAccount(String username) {
+	public ResponseCode revokeAccount(String username) {
 		if (!accountsRepository.existsById(username)) {
 			System.out.println("Account is not found");
-			return false;
+			return NO_USERNAME;
 		}
 		Account account = accountsRepository.findById(username).get();
-		account.setRevoked(true);
-		accountsRepository.save(account);
-		return true;
+		if(account != null && account.isRevoked() == false) {
+			account.setRevoked(true);
+			accountsRepository.save(account);
+			return ResponseCode.OK;
+		}else
+			return ResponseCode.ACCOUNT_NO_ACTIVE;
 	}
 
 	@Override
-	public boolean activateAccount(String username) {
+	public ResponseCode activateAccount(String username) {
 		if (!accountsRepository.existsById(username)) {
 			System.out.println("Account is not found");
-			return false;
+			return NO_USERNAME;
 		}
 		Account account = accountsRepository.findById(username).get();
-		account.setRevoked(false);
-		account.setActivationDate(LocalDate.now());
-		accountsRepository.save(account);
-		return true;
+		if(account != null && account.isRevoked() == true) {
+			account.setRevoked(false);
+			account.setActivationDate(LocalDate.now());
+			accountsRepository.save(account);
+			return ResponseCode.OK;
+		}else
+			return ResponseCode.ACCOUNT_NOT_REVOKE;
 	}
 
 	public static String checkPasswordMatches(String password) {
 		if(password.length()<LENGTH)
 			return "too few symbols";
-		return
-	password.matches
-	("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")?"":"Wrong password structure";
+		return password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")?"":"Wrong password structure";
 	}
 
 }

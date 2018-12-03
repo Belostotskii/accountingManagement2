@@ -20,34 +20,34 @@ public class AccountingController {
 	}
 
 	@DeleteMapping(REMOVE_ACCOUNT)
-	boolean removeAccount(@RequestParam(USERNAME) String id) {
+	ResponseCode removeAccount(@RequestParam(USERNAME) String id) {
 		return accounts.removeAccount(id);
 	}
 
 	@PostMapping(UPDATE_PASSWORD)
-	boolean updatePassword(@RequestBody HashMap<String, String> data) {
+	ResponseCode updatePassword(@RequestBody HashMap<String, String> data) {
 		return accounts.updatePassword(data.get("username"), data.get("password"));
 	}
 
 	@PostMapping(ADD_ROLE)
-	boolean addRole(@RequestBody HashMap<String, String> data) {
+	ResponseCode addRole(@RequestBody HashMap<String, String> data) {
 		return accounts.addRole(data.get("username"), data.get("role"));
 	}
 
 	@DeleteMapping(REMOVE_ROLE)
-	boolean removeRole
+	ResponseCode removeRole
 	(@RequestParam(USERNAME)String username,
 			@RequestParam(ROLE_PARAM) String role){
 		return accounts.removeRole(username, role);
 	}
 
 	@PostMapping(REVOKE_ACCOUNT)
-	boolean revokeAccount(@RequestBody String username) {
+	ResponseCode revokeAccount(@RequestBody String username) {
 		return accounts.revokeAccount(username);
 	}
 
 	@PostMapping(ACTIVATE_ACCOUNT)
-	boolean activateAccount(@RequestBody String username) {
+	ResponseCode activateAccount(@RequestBody String username) {
 		return accounts.activateAccount(username);
 	}
 

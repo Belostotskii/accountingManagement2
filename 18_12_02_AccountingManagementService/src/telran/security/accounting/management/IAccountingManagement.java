@@ -6,11 +6,11 @@ import telran.security.dto.ResponseCode;
 public interface IAccountingManagement {
 
 	public ResponseCode addAccount(AccountDto account);
-	public boolean removeAccount(String id);
-	public boolean addRole(String username, String role);
-	public boolean removeRole(String username, String role);
-	public boolean updatePassword(String username, String password);
-	public boolean revokeAccount(String username);
-	public boolean activateAccount(String username);
+	public ResponseCode removeAccount(String id);
+	public ResponseCode addRole(String username, String role);
+	public ResponseCode removeRole(String username, String role);
+	public ResponseCode updatePassword(String username, String password);
+	public ResponseCode revokeAccount(String username);
+	public ResponseCode activateAccount(String username);
 
 }
